@@ -31,4 +31,3 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
-print("ENV TEST:", Settings().MONGO_DB_URI)
