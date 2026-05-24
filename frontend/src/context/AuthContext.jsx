@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (!token) {
         setUser(null);
+        setLoading(false);
         return;
       }
 
@@ -22,7 +23,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       setUser(res.data);
-    } catch {
+    } catch (error) {
+      console.error("Auth fetch error:", error);
       setUser(null);
     } finally {
       setLoading(false);
