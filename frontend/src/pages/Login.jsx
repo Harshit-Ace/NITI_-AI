@@ -18,25 +18,47 @@ const handleLogin = async (e) => {
   setLoading(true);
 
   try {
-    const res = await api.post("/auth/login", {
-      email,
-      password,
-    });
+    const formData = new URLSearchParams();
+
+    formData.append("username", email);
+    formData.append("password", password);
+
+    const res = await api.post(
+      "/auth/login",
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    console.log("Login response:", res.data);
 
     const token = res.data.access_token;
 
+    if (!token) {
+      throw new Error("No access token received");
+    }
+
     localStorage.setItem("token", token);
-     
+
+    console.log("Token stored:", token);
 
     await refreshUser();
-    
+
     toast.success("Login successful");
     navigate("/");
   } catch (err) {
+    console.error("Login Error:", err);
+    console.error("Response:", err.response?.data);
+
     if (err.response?.status === 401) {
       toast.error("Invalid credentials");
     } else {
-      toast.error("Login failed");
+      toast.error(
+        err.response?.data?.detail || "Login failed"
+      );
     }
   } finally {
     setLoading(false);

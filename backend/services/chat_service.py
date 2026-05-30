@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from datetime import datetime, timezone
+
 from fastapi import HTTPException, status
 
 from schemas.chat import ChatCreate

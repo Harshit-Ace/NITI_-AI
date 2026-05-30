@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from groq import Groq
+from groq import AsyncGroq
 from core.config import settings
 
 
@@ -17,10 +17,10 @@ class BaseLLMProvider(ABC):
 # ===============================
 class GroqLLMProvider(BaseLLMProvider):
     def __init__(self):
-        self.client = Groq(api_key=settings.GROQ_API_KEY)
+        self.client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
     async def generate(self, prompt: str) -> str:
-        response = self.client.chat.completions.create(
+        response = await self.client.chat.completions.create(
             model="openai/gpt-oss-120b",
             messages=[
                 {

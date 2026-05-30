@@ -70,7 +70,16 @@ class MessageService:
             user_profile=profile,
         )
 
-        result = await agent_graph.ainvoke(state)
+        try:
+            result = await agent_graph.ainvoke(state)
+            final_answer = result["final_answer"]
+            sources = result.get("sources")
+        except Exception as exc:
+            print(f"[MESSAGE SERVICE] Agent invocation failed: {exc}")
+            final_answer = (
+                "I’m sorry, I can’t answer that right now. Please try again in a moment."
+            )
+            sources = None
 
         # =====================================================
         # 6️⃣ Save assistant message
@@ -79,8 +88,8 @@ class MessageService:
             "_id": generate_id(),
             "chat_id": payload.chat_id,
             "role": "assistant",
-            "content": result["final_answer"],
-            "sources": result.get("sources"),
+            "content": final_answer,
+            "sources": sources,
             "created_at": datetime.now(timezone.utc),
         }
         await self.messages.insert_one(ai_msg)

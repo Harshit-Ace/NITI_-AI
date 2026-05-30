@@ -1,8 +1,10 @@
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from core.dependencies import get_db, get_current_user_id
-from schemas.auth import UserCreate, UserLogin, UserResponse
+from schemas.auth import UserCreate, UserResponse
 from services.auth_service import AuthService
 
 router = APIRouter()
@@ -19,11 +21,15 @@ async def signup(
 
 @router.post("/login")
 async def login(
-    payload: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncIOMotorDatabase = Depends(get_db),
 ):
     service = AuthService(db)
-    return await service.login(payload.email, payload.password)
+
+    return await service.login(
+        form_data.username,
+        form_data.password
+    )
 
 
 @router.get("/me", response_model=UserResponse)

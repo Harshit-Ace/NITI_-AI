@@ -14,11 +14,15 @@ async def rag_node(state: AgentState) -> AgentState:
     #     categories=[state.user_profile.category] if state.user_profile else None,
     # )
 
-    chunks = await rag.retrieve(
-    query=state.user_query,
-    states=None,
-    categories=None,
-)
+    try:
+        chunks = await rag.retrieve(
+            query=state.user_query,
+            states=None,
+            categories=None,
+        )
+    except Exception as exc:
+        print(f"[RAG NODE] Failed to retrieve RAG chunks: {exc}")
+        chunks = []
 
     state.retrieved_chunks = chunks
 

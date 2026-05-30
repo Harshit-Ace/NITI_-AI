@@ -1,6 +1,7 @@
-import os
-import requests
 from motor.motor_asyncio import AsyncIOMotorDatabase
+import os
+import httpx
+
 from agents.state import RetrievedChunk
 
 
@@ -41,12 +42,21 @@ class RAGService:
             "level": level,
         }
 
-        response = requests.post(
-            self.rag_url,
-            json=payload,
-            timeout=30,
-        )
-        response.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(self.rag_url, json=payload, timeout=30)
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                print(
+                    f"[RAG SERVICE] HTTP error from RAG worker: {exc.response.status_code} - {exc.response.text}"
+                )
+                return []
+            except httpx.RequestError as exc:
+                print(f"[RAG SERVICE] Request error contacting RAG worker at {self.rag_url}: {exc}")
+                return []
+            except Exception as exc:
+                print(f"[RAG SERVICE] Unexpected error contacting RAG worker: {exc}")
+                return []
 
         data = response.json()
 
